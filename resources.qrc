@@ -1,0 +1,29 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="VIDEO">images/glyphicons_008_film.png</file>
+        <file alias="AUDIO">images/glyphicons_017_music.png</file>
+        <file alias="FAST_BACKWARD">images/glyphicons_171_fast_backward.png</file>
+        <file alias="REWIND">images/glyphicons_172_rewind.png</file>
+        <file alias="PLAY">images/glyphicons_173_play.png</file>
+        <file alias="PAUSE">images/glyphicons_174_pause.png</file>
+        <file alias="STOP">images/glyphicons_175_stop.png</file>
+        <file alias="FORWARD">images/glyphicons_176_forward.png</file>
+        <file alias="FAST_FORWARD">images/glyphicons_177_fast_forward.png</file>
+        <file alias="CLEAN">images/glyphicons_067_cleaning.png</file>
+        <file alias="LOCK">images/glyphicons_203_lock.png</file>
+        <file alias="UNLOCK">images/glyphicons_204_unlock.png</file>
+        <file alias="SETTINGS">images/glyphicons_136_cogwheel.png</file>
+        <file alias="0">images/glyphicons_079_signal_0.png</file>
+        <file alias="1">images/glyphicons_079_signal_1.png</file>
+        <file alias="2">images/glyphicons_079_signal_2.png</file>
+        <file alias="3">images/glyphicons_079_signal_3.png</file>
+        <file alias="4">images/glyphicons_079_signal_4.png</file>
+        <file alias="5">images/glyphicons_079_signal.png</file>
+        <file alias="CALENDAR">images/glyphicons_045_calendar.png</file>
+        <file alias="WAIT">images/MnyxU.gif</file>
+        <file alias="SAVE">images/glyphicons_443_floppy_disk.png</file>
+        <file alias="CLOCK">images/glyphicons_054_clock.png</file>
+        <file alias="OK">images/glyphicons_206_ok_2.png</file>
+        <file alias="RECORD">images/glyphicons_169_record.png</file>
+    </qresource>
+</RCC>
