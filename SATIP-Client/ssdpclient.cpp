@@ -8,14 +8,6 @@
 #include <QUrl>
 #include <QUuid>
 
-//#ifdef Q_WS_X11
-#include <arpa/inet.h>
-#include <netinet/in.h>
-//#else
-//#include <winsock2.h>
-//#include <ws2tcpip.h>
-//#endif
-
 class SSDPClientPrivate
 {
 public:

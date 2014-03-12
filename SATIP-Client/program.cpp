@@ -340,7 +340,8 @@ void Program::appendScanPids(QList<quint16> pids)
 
 void Program::appendScanPid(quint16 pid)
 {
-    d->scanPids += pid;
+    if (!d->scanPids.contains(pid))
+        d->scanPids += pid;
 }
 
 void Program::clearScanPids(void)
@@ -395,6 +396,14 @@ QUrl Program::toUrl(const Program::Scheme scheme, const QString &host,
         }
 
         if (purposes.testFlag(Program::Scan)) {
+            if (!d->scanPids.contains(16))
+                d->scanPids += 16;
+            if (!d->scanPids.contains(17))
+                d->scanPids += 17;
+            if (!d->scanPids.contains(18))
+                d->scanPids += 18;
+            if (!d->scanPids.contains(20))
+                d->scanPids += 20;
 
             foreach (quint16 pid, d->scanPids) {
                 pids += QString("%1").arg(pid);
