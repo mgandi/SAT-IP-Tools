@@ -25,10 +25,7 @@ private slots:
     void on_endFrequency_editingFinished();
     void on_bandwidth_editingFinished();
     void on_scanStep_editingFinished();
-    void on_lockTimeout_editingFinished();
-    void on_patTimeout_editingFinished();
     void updateNbSteps();
-    void on_manualStepping_stateChanged(int);
 
 private:
     Ui::ScanSetupDvbtWidget *ui;

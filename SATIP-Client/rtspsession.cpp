@@ -10,7 +10,7 @@
 #include <QUrlQuery>
 #include <QBuffer>
 
-#define DEBUG
+//#define DEBUG
 
 struct RtpHeader {
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN

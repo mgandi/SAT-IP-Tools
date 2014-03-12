@@ -6,20 +6,10 @@
 #include "program.h"
 #include "programmodel.h"
 
-//#define USE_LIBDVBPSI
-
-#ifndef USE_LIBDVBPSI
 #include "demuxer.h"
 #include "patpidhandler.h"
 #include "pmtpidhandler.h"
 #include "sdtpidhandler.h"
-#else // USE_LIBDVBPSI
-#include "pathandler.h"
-#include "pmthandler.h"
-#include "demuxhandler.h"
-#include "sdthandler.h"
-#include "nithandler.h"
-#endif // USE_LIBDVBPSI
 
 #include <QUrl>
 #include <QUrlQuery>
@@ -54,6 +44,7 @@ public:
         patTimeout(5000),
         stepTimeout(10000),
         isAuto(true),
+        initWithDefaultDvbPids(true),
 
         rtpSession(0),
         status(ScanProcedure::Idle),
@@ -70,7 +61,7 @@ public:
 
 
 
-    // Contant elements
+    // Content elements
     ScanProcedure *p;
     GatewayDevice *device;
     Program param;
@@ -80,10 +71,12 @@ public:
     int patTimeout;
     int stepTimeout;
     bool isAuto;
+    bool initWithDefaultDvbPids;
 
     // Scan progress elements
     RTSPSession *rtpSession;
     ScanProcedure::ScanStatus status;
+    int progress;
 
     // Step management
     int lockTimeoutTimerId;
@@ -158,6 +151,16 @@ bool ScanProcedure::isAuto() const
     return d->isAuto;
 }
 
+void ScanProcedure::setInitFrequencyScanWithDefaultDvbPids(bool b)
+{
+    d->initWithDefaultDvbPids = b;
+}
+
+bool ScanProcedure::isInitFrequencyScanWithDefaultDvbPids() const
+{
+    return d->initWithDefaultDvbPids;
+}
+
 void ScanProcedure::start()
 {
     // Clear all frequency specific variables
@@ -166,6 +169,7 @@ void ScanProcedure::start()
     // Initialize all progress management variables
     d->param.setFrequency(0);
     d->status = Started;
+    d->progress = 0;
 
     // Notify that scan was started
     emit scanStarted();
@@ -242,21 +246,11 @@ Program *ScanProcedure::getParam() const
 
 void ScanProcedure::step(bool stepForward)
 {
-    int progress;
-
     beginStep();
 
-    // Update current frequency if not currently paused
-    if (scanStatus() != Paused) {
-        progress = getStep(stepForward);
-    } else {
-        d->status = Started;
-
-        // Notify that the scan was re-started
-        emit scanStarted();
-    }
-
-    if (progress == 100) {
+    // If the progress is 100% before we update it then it means the scan is completed and we can terminate it
+    // This is use to make sure that the step corresponding to the latest frequency is executed before we terminate the scan
+    if (d->progress == 100) {
         // Stop the RTSP session if running
         deleteSession();
 
@@ -268,15 +262,31 @@ void ScanProcedure::step(bool stepForward)
         return;
     }
 
+    // Update current frequency if not currently paused
+    if (scanStatus() != Paused) {
+        d->progress = getStep(stepForward);
+    } else {
+        d->status = Started;
+
+        // Notify that the scan was re-started
+        emit scanStarted();
+    }
+
     qDebug() << "=========================================";
     qDebug() << "Frequency: " << d->param.frequency();
 
     // Communicate the progress of the scan
-    emit scanProgress(progress, d->param.frequency(), 0 /* d->endFrequency */);
+    emit scanProgress(d->progress, d->param.frequency(), endFrequency() / 1000);
 
-    /* request more than just PID 0 to speed up the acquisition */
+    // Reset PIDs of the request
     d->param.clearScanPids();
-    //d->param.appendScanPids(QList<quint16>() << 1 << 16 << 17 << 18 << 19 << 20);
+
+    // If init with default DVB pids then
+    if (isInitFrequencyScanWithDefaultDvbPids())
+        // request more than just PID 0 to speed up the acquisition
+        d->param.appendScanPids(QList<quint16>() << 16 << 17 << 18 << 20);
+
+    // Get corresponding URL
     QUrl qUrl = d->param.toUrl(Program::RTSP, d->device->host(), Program::Scan, NULL);
 
     // Create new RTSP session if does not exist & connect its signals
@@ -299,7 +309,6 @@ void ScanProcedure::step(bool stepForward)
     endStep();
 }
 
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::patFound()
 {
     PatPidHandler *patHandler = qobject_cast<PatPidHandler *>(sender());
@@ -354,49 +363,7 @@ void ScanProcedure::patFound()
 
     checkDone();
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::patFound()
-{
-    PatHandler *patHandler = qobject_cast<PatHandler *>(sender());
 
-    // Kill running timer
-    killRunningTimer();
-
-    // Take notes that we found a PAT
-    d->tables |= ScanProcedurePrivate::PAT;
-
-    // A PAT was found so we can create a demux handler and attach it
-    DemuxHandler *demuxHandler = new DemuxHandler(this);
-    connect(demuxHandler, SIGNAL(newHandler(AbstractDvbPsiHandler*)),
-            this, SLOT(newHandler(AbstractDvbPsiHandler*)));
-    demuxHandler->attach();
-    d->handlers += demuxHandler;
-
-    // Go through all PMT
-    qDebug() << "=========================================";
-    qDebug() << "Found a PAT for TS ID in " << patHandler->tsId() << "@" << d->param.frequency());
-    foreach (PatProgram program, patHandler->programs()) {
-        qDebug() << "| " << qPrintable(QString("%1").arg(program.number, 5)) << qPrintable(QString(" PID 0x%1 (%2)").arg(program.pid, 4, 16, QLatin1Char('0')).arg(program.pid));
-        if (program.number) { // Ignore program number 0 which when present is the NIT
-            // Create a program for each PMT mentioned in the PAT
-            Program *prgm = new Program(d->param.frequency(), (quint8)(d->bandwidth/1000), patHandler->tsId(), program.number, program.pid);
-            d->tmpProgramsMap.insert(program.number, prgm);
-            d->tmpPrograms += prgm;
-
-            // Create a handler for each PMT
-            PmtHandler *handler = new PmtHandler(program.number, this);
-            connect(handler, SIGNAL(dataChanged()),
-                    this, SLOT(pmtFound()));
-            handler->attach();
-            d->handlers += handler;
-        }
-    }
-
-    checkDone();
-}
-#endif // USE_LIBDVBPSI
-
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::pmtFound()
 {
     PmtPidHandler *pmtHandler = qobject_cast<PmtPidHandler *>(sender());
@@ -411,24 +378,7 @@ void ScanProcedure::pmtFound()
 
     checkDone();
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::pmtFound()
-{
-    PmtHandler *pmtHandler = qobject_cast<PmtHandler *>(sender());
 
-    Program *program = d->tmpProgramsMap.value(pmtHandler->programNumber());
-    if (program) {
-        program->setPcrPid(pmtHandler->pcrPid());
-        foreach (PmtElementaryStream *es, pmtHandler->elementaryStreams()) {
-            program->appendElementaryStream(es->pid, es->type);
-        }
-    }
-
-    checkDone();
-}
-#endif // USE_LIBDVBPSI
-
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::sdtFound()
 {
     SdtPidHandler *sdtHandler = qobject_cast<SdtPidHandler *>(sender());
@@ -448,61 +398,12 @@ void ScanProcedure::sdtFound()
 
     checkDone();
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::sdtFound()
-{
-    SdtHandler *sdtHandler = qobject_cast<SdtHandler *>(sender());
 
-    d->tables |= ScanProcedurePrivate::SDT;
-
-    qDebug() << "=========================================";
-    foreach (SdtService *service, sdtHandler->services()->values()) {
-        Program *program = d->tmpProgramsMap.value(service->serviceId);
-        if (program) {
-            program->setServiceProviderName(service->serviceProviderName);
-            program->setServiceName(service->serviceName);
-            qDebug() << service->serviceName;
-        }
-    }
-
-    checkDone();
-}
-#endif // USE_LIBDVBPSI
-
-#ifndef USE_LIBDVBPSI
-#else // USE_LIBDVBPSI
-void ScanProcedure::nitFound()
-{
-    NitHandler *nitHandler = qobject_cast<NitHandler *>(sender());
-    Q_UNUSED(nitHandler);
-}
-
-void ScanProcedure::newHandler(AbstractDvbPsiHandler *handler)
-{
-    SdtHandler *sdtHandler;
-    NitHandler *nitHandler;
-
-    if ((sdtHandler = qobject_cast<SdtHandler *>(handler))) {
-        connect(sdtHandler, SIGNAL(dataChanged()),
-                this, SLOT(sdtFound()));
-        d->handlers += sdtHandler;
-    }
-
-    else if ((nitHandler = qobject_cast<NitHandler *>(handler))) {
-        qDebug() << "=========================================";
-        qDebug() << "Have a new NIT handler!!!";
-        connect(nitHandler, SIGNAL(dataChanged()),
-                this, SLOT(nitFound()));
-        d->handlers += nitHandler;
-    }
-}
-#endif // USE_LIBDVBPSI
 
 void ScanProcedure::checkDone()
 {
     bool allPmtTriggered = true, hasPmtHandler = false;
 
-#ifndef USE_LIBDVBPSI
     foreach (AbstractPidHandler *handler, d->pidHandlers) {
         PmtPidHandler *pmtHandler = qobject_cast<PmtPidHandler *>(handler);
         if (pmtHandler) {
@@ -510,15 +411,6 @@ void ScanProcedure::checkDone()
             hasPmtHandler = true;
         }
     }
-#else // USE_LIBDVBPSI
-    foreach (AbstractDvbPsiHandler *handler, d->handlers) {
-        PmtHandler *pmtHandler = qobject_cast<PmtHandler *>(handler);
-        if (pmtHandler) {
-            allPmtTriggered &= pmtHandler->triggered();
-            hasPmtHandler = true;
-        }
-    }
-#endif // USE_LIBDVBPSI
 
     qDebug() << "=========================================";
     if (allPmtTriggered && hasPmtHandler) {
@@ -559,13 +451,7 @@ void ScanProcedure::packetsAvailable(quint32 ssrc, QList<QByteArray> &packets)
             d->currentSsrc = ssrc;
     }
 
-#ifndef USE_LIBDVBPSI
     d->demuxer.push(packets);
-#else // USE_LIBDVBPSI
-    foreach (AbstractDvbPsiHandler *handler, d->handlers) {
-        if (handler->attached()) handler->push(packets);
-    }
-#endif // USE_LIBDVBPSI
 }
 
 void ScanProcedure::rtcpReportAvailable(const RTCPReport &report)
@@ -605,10 +491,10 @@ void ScanProcedure::timerEvent(QTimerEvent *e)
 {
     if (e->timerId() == d->lockTimeoutTimerId) {
         qDebug() << "=========================================";
-        qDebug() << "Lock timeout!";
+        qDebug() << "Lock timeout! (" << d->param.frequency() << " MHz)";
     } else if (e->timerId() == d->patTimeoutTimerId) {
         qDebug() << "=========================================";
-        qDebug() << "PAT timeout!";
+        qDebug() << "PAT timeout! (" << d->param.frequency() << " MHz)";
     }
 
     // Kill timer so it does not repeat if not re-armed
@@ -635,7 +521,6 @@ bool ScanProcedure::event(QEvent *e)
     return QObject::event(e);
 }
 
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::beginStep()
 {
     // Kill all running timer
@@ -659,30 +544,6 @@ void ScanProcedure::beginStep()
     // Clear tables found
     d->tables = 0;
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::beginStep()
-{
-    // Kill all running timer
-    killRunningTimer();
-
-    // Dettach all handlers
-    dettachHandlers();
-
-    // Clear all handlers
-    qDeleteAll(d->handlers);
-    d->handlers.clear();
-
-    // Commit temporary data if any
-    commitData();
-
-    // Update SSRC
-    d->lastSsrc = d->currentSsrc;
-    d->currentSsrc = 0;
-
-    // Clear tables found
-    d->tables = 0;
-}
-#endif // USE_LIBDVBPSI
 
 void ScanProcedure::endStep()
 {
@@ -696,37 +557,19 @@ void ScanProcedure::clearAll()
     endStep();
 }
 
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::attachHandlers()
 {
     foreach (AbstractPidHandler *handler, d->pidHandlers) {
         if (!handler->isAttached()) handler->attach();
     }
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::attachHandlers()
-{
-    foreach (AbstractDvbPsiHandler *handler, d->handlers) {
-        if (!handler->attached()) handler->attach();
-    }
-}
-#endif // USE_LIBDVBPSI
 
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::dettachHandlers()
 {
     foreach (AbstractPidHandler *handler, d->pidHandlers) {
         if (handler->isAttached()) handler->dettach();
     }
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::dettachHandlers()
-{
-    foreach (AbstractDvbPsiHandler *handler, d->handlers) {
-        if (handler->attached()) handler->dettach();
-    }
-}
-#endif // USE_LIBDVBPSI
 
 void ScanProcedure::commitData()
 {
@@ -761,7 +604,6 @@ void ScanProcedure::killRunningTimer()
     }
 }
 
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::locked()
 {
     // Check if already locked
@@ -800,42 +642,7 @@ void ScanProcedure::locked()
     // Launch PAT timeout timer
     d->patTimeoutTimerId = startTimer(d->patTimeout);
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::locked()
-{
-    // We kill the potential running timer since the tuner is locked
-    killRunningTimer();
 
-    // Change scan procedure lock status
-    d->locked = true;
-    qDebug() << "=========================================";
-    qDebug() << "Locked!";
-
-    // Check if a pat handler already exists
-    PatHandler *patHandler = 0;
-    foreach (AbstractDvbPsiHandler *handler, d->handlers) {
-        if ((patHandler = qobject_cast<PatHandler *>(handler)))
-            break;
-    }
-
-    // If no PAT handler exist create it and attach it
-    if (!patHandler) {
-        PatHandler *handler = new PatHandler(this);
-        connect(handler, SIGNAL(dataChanged()),
-                this, SLOT(patFound()));
-        handler->attach();
-        d->handlers += handler;
-    }
-
-    // Attach all handlers
-    attachHandlers();
-
-    // Launch PAT timeout timer
-    d->patTimeoutTimerId = startTimer(d->patTimeout);
-}
-#endif // USE_LIBDVBPSI
-
-#ifndef USE_LIBDVBPSI
 void ScanProcedure::unlocked()
 {
     // Check if we are unlocked
@@ -856,24 +663,6 @@ void ScanProcedure::unlocked()
     // We have to re-launch the lock timeout timer
     d->lockTimeoutTimerId = startTimer(d->lockTimeout);
 }
-#else // USE_LIBDVBPSI
-void ScanProcedure::unlocked()
-{
-    // We kill the potential running timer since the tuner is unlocked
-    killRunningTimer();
-
-    // Deattach all handlers
-    dettachHandlers();
-
-    // Now we are unlocked
-    d->locked = false;
-    qDebug() << "=========================================";
-    qDebug() << "Unlocked!";
-
-    // We have to re-launch the lock timeout timer
-    d->lockTimeoutTimerId = startTimer(d->lockTimeout);
-}
-#endif // USE_LIBDVBPSI
 
 void ScanProcedure::deleteSession()
 {

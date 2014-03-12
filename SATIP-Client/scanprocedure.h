@@ -34,6 +34,8 @@ public slots:
     int stepTimeout() const;
     void setAuto(bool isAuto);
     bool isAuto() const;
+    void setInitFrequencyScanWithDefaultDvbPids(bool b);
+    bool isInitFrequencyScanWithDefaultDvbPids() const;
 
     void start();
     void pause();
@@ -49,11 +51,6 @@ protected slots:
     void patFound();
     void pmtFound();
     void sdtFound();
-#ifndef USE_LIBDVBPSI
-#else // USE_LIBDVBPSI
-    void nitFound();
-    void newHandler(AbstractDvbPsiHandler *handler);
-#endif // USE_LIBDVBPSI
     void checkDone();
 
     void packetsAvailable(quint32 ssrc, QList<QByteArray> &packets);
@@ -62,6 +59,11 @@ protected slots:
     void step(bool stepForward = true);
     virtual int getStep(bool stepForward = true) = 0;
     Program *getParam() const;
+
+    virtual int startFrequency() const = 0;
+    virtual int endFrequency() const = 0;
+    virtual int scanStep() const = 0;
+    virtual int nbSteps() const = 0;
 
     void timerEvent(QTimerEvent *e);
     bool event(QEvent *);

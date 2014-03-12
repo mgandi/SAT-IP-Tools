@@ -26,10 +26,6 @@ ScanSetupDvbtWidget::ScanSetupDvbtWidget(ScanProcedureDvbt *procedure, QWidget *
             procedure, SLOT(setScanStep(int)));
     connect(ui->bandwidth, SIGNAL(valueChanged(int)),
             procedure, SLOT(setBandwidth(int)));
-    connect(ui->lockTimeout, SIGNAL(valueChanged(int)),
-            procedure, SLOT(setLockTimeout(int)));
-    connect(ui->patTimeout, SIGNAL(valueChanged(int)),
-            procedure, SLOT(setPatTimeout(int)));
 
     init();
 }
@@ -47,9 +43,8 @@ void ScanSetupDvbtWidget::init()
     ui->endFrequency->setValue(d->procedure->endFrequency());
     ui->scanStep->setValue(d->procedure->scanStep());
     ui->bandwidth->setValue(d->procedure->bandwidth());
-    ui->lockTimeout->setValue(d->procedure->lockTimeout());
-    ui->patTimeout->setValue(d->procedure->patTimeout());
-    d->procedure->isAuto() ? ui->manualStepping->setCheckState(Qt::Unchecked) : ui->manualStepping->setCheckState(Qt::Checked);
+    ui->commonScanSetup->setProcedure(d->procedure);
+    updateNbSteps();
 }
 
 
@@ -80,33 +75,7 @@ void ScanSetupDvbtWidget::on_scanStep_editingFinished()
     updateNbSteps();
 }
 
-void ScanSetupDvbtWidget::on_lockTimeout_editingFinished()
-{
-}
-
-void ScanSetupDvbtWidget::on_patTimeout_editingFinished()
-{
-}
-
 void ScanSetupDvbtWidget::updateNbSteps()
 {
     ui->numberOfSteps->setText(QString("%1").arg(d->procedure->nbSteps()));
-}
-
-void ScanSetupDvbtWidget::on_manualStepping_stateChanged(int checkState)
-{
-    bool isAuto;
-    switch (checkState) {
-    case Qt::Checked:
-        isAuto = false;
-        break;
-    case Qt::Unchecked:
-        isAuto = true;
-        break;
-    case Qt::PartiallyChecked:
-        isAuto = false;
-        break;
-    }
-
-    d->procedure->setAuto(isAuto);
 }

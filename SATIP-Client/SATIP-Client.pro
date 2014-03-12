@@ -157,7 +157,8 @@ SOURCES += \
     scanproceduredvbt.cpp \
     scanproceduredvbs.cpp \
     scansetupdvbtwidget.cpp \
-    scansetupdvbswidget.cpp
+    scansetupdvbswidget.cpp \
+    scansetupcommonwidget.cpp
 
 HEADERS  += \
 #    ../libdvbpsi/config.h \
@@ -310,7 +311,8 @@ HEADERS  += \
     scanproceduredvbt.h \
     scanproceduredvbs.h \
     scansetupdvbtwidget.h \
-    scansetupdvbswidget.h
+    scansetupdvbswidget.h \
+    scansetupcommonwidget.h
 
 FORMS    += mainwindow.ui \
     gatewaywidget.ui \
@@ -318,10 +320,7 @@ FORMS    += mainwindow.ui \
     dvbsconfig.ui \
     addsessiondialog.ui \
     ../UDP-Listener/udplistener.ui \
-    scandialog.ui \
-    scansetuppage.ui \
     scanprogress.ui \
-    scanwizard.ui \
     scanwidget.ui \
     sessionwidget.ui \
     udpforwarddialog.ui \
@@ -333,7 +332,8 @@ FORMS    += mainwindow.ui \
     programtesterwidget.ui \
     zapchanneldialog.ui \
     scansetupdvbtwidget.ui \
-    scansetupdvbswidget.ui
+    scansetupdvbswidget.ui \
+    scansetupcommonwidget.ui
 
 RESOURCES += \
     ../resources.qrc
