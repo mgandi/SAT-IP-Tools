@@ -671,7 +671,7 @@ void ScanProcedure::deleteSession()
         d->device->removeSession(d->rtpSession, true);
         // Stop the RTSP session
         d->rtpSession->stop();
-        d->rtpSession->wait();
+//        d->rtpSession->wait();
         delete d->rtpSession;
         d->rtpSession = 0;
     }

@@ -10,7 +10,7 @@
 class RtcpSocket;
 class RtpSocket;
 class RTSPSessionPrivate;
-class RTSPSession : public QThread
+class RTSPSession : public QObject
 {
     Q_OBJECT
 public:

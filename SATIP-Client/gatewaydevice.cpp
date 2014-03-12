@@ -287,7 +287,7 @@ RTSPSession *GatewayDevice::addSession(Program *program, bool unicast, const Pro
         return session;
     } else {
         session->stop();
-        session->wait();
+//        session->wait();
         delete session;
         return 0;
     }
@@ -301,7 +301,7 @@ RTSPSession *GatewayDevice::addSession(const RequestParams &requestParams)
         return session;
     } else {
         session->stop();
-        session->wait();
+//        session->wait();
         delete session;
         return 0;
     }
@@ -351,7 +351,7 @@ bool GatewayDevice::removeSession(RTSPSession *session, bool force)
     bool ret = d->model.removeSession(session);
     if (ret && !force) {
         session->stop();
-        session->wait();
+//        session->wait();
         delete session;
     }
     return ret;

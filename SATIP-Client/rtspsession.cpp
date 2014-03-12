@@ -52,7 +52,7 @@ public:
 };
 
 RTSPSession::RTSPSession(const QString &localAddress, const QUrl &url, bool unicast, bool startPlaying, QObject *parent) :
-    QThread(parent),
+    QObject(parent),
     d(new RTSPSessionPrivate)
 {
     // Initialize data
@@ -92,7 +92,7 @@ RTSPSession::RTSPSession(const QString &localAddress, const QUrl &url, bool unic
     if (setup() && startPlaying)
         play();
 
-    start();
+//    start();
 }
 
 RTSPSession::~RTSPSession()
@@ -186,7 +186,7 @@ quint64 RTSPSession::nbPacketReceived()
 void RTSPSession::stop()
 {
     teardown();
-    quit();
+//    quit();
 }
 
 bool RTSPSession::updateSetup(const QUrl &url)

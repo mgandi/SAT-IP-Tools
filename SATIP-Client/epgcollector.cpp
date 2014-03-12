@@ -56,7 +56,7 @@ EpgCollector::~EpgCollector()
     if (d->epgSession) {
         d->device->removeSession(d->epgSession);
         d->epgSession->stop();
-        d->epgSession->wait();
+//        d->epgSession->wait();
         delete d->epgSession;
         d->epgSession = 0;
     }
@@ -95,7 +95,7 @@ void EpgCollector::stop()
     if (d->epgSession) {
         d->device->removeSession(d->epgSession, true);
         d->epgSession->stop();
-        d->epgSession->wait();
+//        d->epgSession->wait();
         delete d->epgSession;
         d->epgSession = 0;
     }
@@ -122,7 +122,7 @@ void EpgCollector::step()
         if (!d->epgSession) {
             qWarning() << "Unable to add RTSP session";
             session->stop();
-            session->wait();
+//            session->wait();
             delete session;
             return;
         } else {

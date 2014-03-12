@@ -164,6 +164,10 @@ void ChannelListView::openMulticastSession()
 {
     QModelIndex index = currentIndex();
 
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     Settings settings;
     QString vlc = settings.vlc();
     if (vlc.isEmpty())
@@ -186,6 +190,10 @@ void ChannelListView::openUnicastSession()
 {
     QModelIndex index = currentIndex();
 
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     Settings settings;
     QString vlc = settings.vlc();
     if (vlc.isEmpty())
@@ -207,6 +215,10 @@ void ChannelListView::openUnicastSession()
 void ChannelListView::openWithVlc()
 {
     QModelIndex index = currentIndex();
+
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
 
     Settings settings;
     QString vlc = settings.vlc();
@@ -236,6 +248,10 @@ void ChannelListView::openRTSPWithVlc()
 {
     QModelIndex index = currentIndex();
 
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     Settings settings;
     QString vlc = settings.vlc();
     if (vlc.isEmpty())
@@ -263,6 +279,10 @@ void ChannelListView::openRTSPWithVlc()
 void ChannelListView::record()
 {
     QModelIndex index = currentIndex();
+
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
 
     Settings settings;
     QString vlc = settings.vlc();
@@ -294,6 +314,10 @@ void ChannelListView::recordRTSP()
 {
     QModelIndex index = currentIndex();
 
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     Settings settings;
     QString vlc = settings.vlc();
     if (vlc.isEmpty())
@@ -324,6 +348,10 @@ void ChannelListView::streamTest()
 {
     QModelIndex index = currentIndex();
 
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     if (!d->device)
         return;
 
@@ -346,6 +374,10 @@ void ChannelListView::streamTestRTSP()
 {
     QModelIndex index = currentIndex();
 
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     if (!d->device)
         return;
 
@@ -366,6 +398,10 @@ void ChannelListView::streamTestRTSP()
 //void ChannelListView::deleteChannel()
 //{
 //    QModelIndex index = currentIndex();
+
+//    // Make sure there a current index
+//    if (!index.isValid())
+//        return;
 
 //    QObject *o = static_cast<QObject *>(index.internalPointer());
 //    Program *program = qobject_cast<Program *>(o);

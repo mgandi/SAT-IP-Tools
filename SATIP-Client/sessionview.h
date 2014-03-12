@@ -21,6 +21,7 @@ protected slots:
     void error(QProcess::ProcessError error);
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
     void packetsAvailable(quint32 ssrc, QList<QByteArray>&packets);
+//    void itemActivated(const QModelIndex &index);
 
 signals:
     void addSession();

@@ -43,6 +43,11 @@ SessionView::SessionView(QWidget *parent) :
     d->forwardTo = new QAction("Forward to...", this); // NOT WORKING !!!
     d->zapChannelAction = new QAction("Change channel", this);
 
+//    d->removeSessionAction->setEnabled(false);
+//    d->joinSessionWithVlc->setEnabled(false);
+//    d->forwardTo->setEnabled(false);
+//    d->zapChannelAction->setEnabled(false);
+
     setContextMenuPolicy(Qt::ActionsContextMenu);
     addAction(d->addSessionAction);
     addAction(d->removeSessionAction);
@@ -60,6 +65,9 @@ SessionView::SessionView(QWidget *parent) :
             this, SLOT(forwardTo()));
     connect(d->zapChannelAction, SIGNAL(triggered()),
             this, SLOT(zapChannelSlot()));
+
+//    connect(this, SIGNAL(clicked(QModelIndex)),
+//            this, SLOT(itemActivated(QModelIndex)));
 }
 
 SessionView::~SessionView()
@@ -71,6 +79,11 @@ SessionView::~SessionView()
 void SessionView::removeSessionSlot()
 {
     QModelIndex index = currentIndex();
+
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     int row = index.row();
     SessionModel *m = qobject_cast<SessionModel *>(model());
     emit removeSession(m->sessionAtIndex(row));
@@ -79,6 +92,11 @@ void SessionView::removeSessionSlot()
 void SessionView::zapChannelSlot()
 {
     QModelIndex index = currentIndex();
+
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
+
     int row = index.row();
     SessionModel *m = qobject_cast<SessionModel *>(model());
     emit zapChannel(m->sessionAtIndex(row));
@@ -87,6 +105,10 @@ void SessionView::zapChannelSlot()
 void SessionView::joinSessionWithVlc()
 {
     QModelIndex index = currentIndex();
+
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
 
     Settings settings;
     QString vlc = settings.vlc();
@@ -119,6 +141,10 @@ void SessionView::joinSessionWithVlc()
 void SessionView::forwardTo()
 {
     QModelIndex index = currentIndex();
+
+    // Make sure there a current index
+    if (!index.isValid())
+        return;
 
     QObject *o = static_cast<QObject *>(index.internalPointer());
     RTSPSession *session = qobject_cast<RTSPSession *>(o);
@@ -161,3 +187,18 @@ void SessionView::packetsAvailable(quint32, QList<QByteArray> &packets)
             qDebug() << "Failed to send all data";
     }
 }
+
+//void SessionView::itemActivated(const QModelIndex &index)
+//{
+//    if (index.isValid()) {
+//        d->removeSessionAction->setEnabled(true);
+//        d->joinSessionWithVlc->setEnabled(true);
+//        d->forwardTo->setEnabled(true);
+//        d->zapChannelAction->setEnabled(true);
+//    } else {
+//        d->removeSessionAction->setEnabled(false);
+//        d->joinSessionWithVlc->setEnabled(false);
+//        d->forwardTo->setEnabled(false);
+//        d->zapChannelAction->setEnabled(false);
+//    }
+//}

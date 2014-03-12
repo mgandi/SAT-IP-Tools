@@ -105,7 +105,6 @@ SOURCES += \
     sessionmodel.cpp \
     addsessiondialog.cpp \
     sessionview.cpp \
-    scandialog.cpp \
     scanprocedure.cpp \
     rtcpreport.cpp \
     program.cpp \
@@ -257,7 +256,6 @@ HEADERS  += \
     sessionmodel.h \
     addsessiondialog.h \
     sessionview.h \
-    scandialog.h \
     scanprocedure.h \
     rtcpreport.h \
     program.h \
