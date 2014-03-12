@@ -578,7 +578,8 @@ void ScanProcedure::commitData()
                       ScanProcedurePrivate::PMT)) { // We have ll the information required for the listed programs
         // Add each program found to gateway device
         foreach (Program *program, d->tmpPrograms) {
-            d->device->addProgram(program);
+            if (program->containsVideo())
+                d->device->addProgram(program);
         }
 
         // Clear the tmp list and map of programs
