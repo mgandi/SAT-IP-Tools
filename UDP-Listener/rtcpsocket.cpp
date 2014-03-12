@@ -102,6 +102,7 @@ void RtcpSocket::readPendingDatagrams()
                      &sender, &senderPort);
 
         d->lastReport = RTCPReport(datagram);
+
         emit reportAvailable(d->lastReport);
     }
 }

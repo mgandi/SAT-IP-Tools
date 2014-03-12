@@ -459,12 +459,10 @@ void ScanProcedure::rtcpReportAvailable(const RTCPReport &report)
     static RTCPReport lastReport;
 
     // Make sure that we don't treat packet from previous frequency
-    if (d->currentSsrc == 0) {
-        if (d->lastSsrc == report.ssrc()) {
-//            qDebug() << "RTCP Report from last SSRC (" << report.ssrc() << ") -> ignored!";
-            return;
-        } else
-            d->currentSsrc = report.ssrc();
+    // TODO: Find a way to base it on SSRC
+    if (d->param.frequency() != report.frequency()) {
+        qDebug() << "=========================================";
+        qDebug() << "RTCP Report from last SSRC (" << report.ssrc() << ") -> ignored!";
     }
 
     if (report == lastReport) {
