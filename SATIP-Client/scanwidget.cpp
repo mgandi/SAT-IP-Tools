@@ -256,3 +256,42 @@ void ScanWidget::scanPaused()
     ui->stepForwardButton->setEnabled(false);
     ui->stepBackwardButton->setEnabled(false);
 }
+
+QDebug operator<< (QDebug d, const Program &p) {
+    if (p.system() == DVBS || p.system() == DVBS2)
+        d << "DVBS channel: name " << p.serviceName() << "freq" << p.frequency() \
+          << "symb" << p.symbolRate() << "mod" << p.modulation() << "pol" \
+          << p.vPolarization() << "src" << p.satPos();
+
+    return d;
+}
+
+void ScanWidget::on_addChannel_clicked()
+{
+    AddSessionDialog dialog(this, d->device->capabilities(), 0);
+    if (dialog.exec() == QDialog::Accepted) {
+        RequestParams p = dialog.requestParams();
+
+        Program prog;
+        prog.setFrequency(p.freq);
+        prog.setSystem(p.msys);
+        prog.setModulation(p.mtype);
+        prog.setSatPos(p.src);
+        prog.setSymbolRate(p.sr);
+        prog.setVPolarization(p.vpol);
+        prog.setServiceName(p.name);
+        prog.setServiceProviderName(p.name);
+
+        QStringList slist = p.pids.split(",");
+        foreach (const QString &str, slist) {
+            int pid = str.toInt();
+            prog.appendElementaryStream(pid, ELEMENTARY_TYPE_TEST);
+        }
+        qDebug() << "added channel" << prog << "containsTest" << prog.containsTest();
+
+
+
+        // p.transportStreamID, quint16 number, quint16 pid, QObject *parent) :
+        d->device->addProgram(&prog);
+    }
+}

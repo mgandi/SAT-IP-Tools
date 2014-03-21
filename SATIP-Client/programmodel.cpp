@@ -170,6 +170,8 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const
                 return QIcon(":/images/VIDEO");
             } else if (program->containsAudio()) {
                 return QIcon(":/images/AUDIO");
+            } else if (program->containsTest()) {
+                return QIcon(":/images/TEST");
             }
         }
         break;
@@ -184,7 +186,8 @@ void ProgramModel::addProgram(Program *program)
     if (d->programs.contains(program))
         return;
 
-    if (!program->containsAudio() && !program->containsVideo())
+    if (!program->containsAudio() && !program->containsVideo() &&
+            !program->containsTest())
         return;
 
     int index = d->programs.size();

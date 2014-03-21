@@ -32,6 +32,7 @@ struct RequestParams
     Fec fec;
     quint8 bw;
     QString pids;
+    QString name;
 };
 
 class SSDPClient;

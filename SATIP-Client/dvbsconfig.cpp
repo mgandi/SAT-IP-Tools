@@ -13,6 +13,12 @@ DvbSConfig::~DvbSConfig()
     delete ui;
 }
 
+void DvbSConfig::hideFe()
+{
+    ui->fe->setVisible(false);
+    ui->labelFe->setVisible(false);
+}
+
 quint8 DvbSConfig::src() const
 {
     return ui->src->value();

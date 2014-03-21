@@ -22,18 +22,39 @@
     </widget>
    </item>
    <item>
-    <widget class="QComboBox" name="msys">
-     <item>
-      <property name="text">
-       <string>DVB-T</string>
-      </property>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelName">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
      </item>
-     <item>
-      <property name="text">
-       <string>DVB-S</string>
-      </property>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="name"/>
      </item>
-    </widget>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="msys">
+       <item>
+        <property name="text">
+         <string>DVB-T</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DVB-S</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>System</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">

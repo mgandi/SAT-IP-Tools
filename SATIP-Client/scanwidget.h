@@ -26,6 +26,7 @@ private slots:
     void on_stopButton_clicked();
     void on_stepForwardButton_clicked();
     void on_stepBackwardButton_clicked();
+    void on_addChannel_clicked();
 
     void showProgressStatus();
     void hideProgressStatus();

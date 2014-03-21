@@ -23,6 +23,9 @@ enum Mtype
 Q_DECLARE_FLAGS(Modulations, Mtype)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Modulations)
 
+
+#define ELEMENTARY_TYPE_TEST 0x37 /* reserved value used for test stream */
+
 class Event;
 class ElementaryStream;
 class ProgramPrivate;
@@ -89,6 +92,7 @@ public:
     bool scrambled() const;
     bool containsVideo() const;
     bool containsAudio() const;
+    bool containsTest() const;
     quint32 uid() const;
 
     Program &operator =(const Program &other);

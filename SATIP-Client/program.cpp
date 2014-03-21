@@ -301,6 +301,14 @@ bool Program::containsAudio() const
     return so;
 }
 
+bool Program::containsTest() const
+{
+    foreach (ElementaryStream *es, d->es)
+        if (es->type() == ELEMENTARY_TYPE_TEST)
+            return true;
+    return false;
+}
+
 quint32 Program::uid() const
 {
     return ((quint32)d->transportStreamID << 16 |
@@ -332,6 +340,8 @@ Program &Program::operator =(const Program &other)
 
     return *this;
 }
+
+
 
 void Program::appendScanPids(QList<quint16> pids)
 {

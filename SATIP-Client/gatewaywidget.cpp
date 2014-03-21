@@ -83,7 +83,7 @@ GatewayDevice *GatewayWidget::device() const
 
 void GatewayWidget::addSession()
 {
-    AddSessionDialog dialog(this, d->device->capabilities());
+    AddSessionDialog dialog(this, d->device->capabilities(), 1);
     if (dialog.exec() == QDialog::Accepted) {
         d->device->addSession(dialog.requestParams());
     }

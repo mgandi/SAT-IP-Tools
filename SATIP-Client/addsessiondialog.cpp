@@ -2,7 +2,7 @@
 #include "ui_addsessiondialog.h"
 
 
-AddSessionDialog::AddSessionDialog(QWidget *parent, Systems systems) :
+AddSessionDialog::AddSessionDialog(QWidget *parent, Systems systems, int isSession) :
     QDialog(parent),
     ui(new Ui::AddSessionDialog)
 {
@@ -17,11 +17,20 @@ AddSessionDialog::AddSessionDialog(QWidget *parent, Systems systems) :
     if (systems & DVBS2)
         ui->msys->insertItem(0, "DVB-S2");
 
+    if (!isSession) {
+       ui->unicast->setVisible(false);
+       ui->dvbs->hideFe();
+    } else {
+       ui->name->setVisible(false);
+       ui->labelName->setVisible(false);
+    }
+
     connect( this, SIGNAL(msysUpdated(int)),
              ui->stackedWidget, SLOT(setCurrentIndex(int)) );
 
     emit msysUpdated((systems & DVBT || systems & DVBT2) ? 0 : 1);
 }
+
 
 /* for DVB-S only */
 AddSessionDialog::AddSessionDialog(QWidget *parent) :
@@ -57,6 +66,8 @@ RequestParams AddSessionDialog::requestParams() const
     }
     requestParams.rtp = true;
     requestParams.unicast = ui->unicast->isChecked();
+    requestParams.name = ui->name->text();
+
     switch (requestParams.msys) {
     case DVBS2:
     case DVBS:

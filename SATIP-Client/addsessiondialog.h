@@ -15,7 +15,7 @@ class AddSessionDialog : public QDialog
     Q_OBJECT
     
 public:
-    AddSessionDialog(QWidget *parent, Systems systems);
+    AddSessionDialog(QWidget *parent, Systems systems, int isSession);
     AddSessionDialog(QWidget *parent);
     ~AddSessionDialog();
 
@@ -29,6 +29,7 @@ private slots:
 
 private:
     Ui::AddSessionDialog *ui;
+    int isSession;
 };
 
 #endif // ADDSESSIONDIALOG_H

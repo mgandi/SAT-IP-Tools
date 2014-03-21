@@ -25,6 +25,7 @@ public:
     quint32 sr() const;
     Fec fec() const;
     QString pids() const;
+    void hideFe();
 
 private:
     Ui::DvbSConfig *ui;
