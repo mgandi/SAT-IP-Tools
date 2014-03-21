@@ -26,6 +26,6 @@
         <file alias="OK">images/glyphicons_206_ok_2.png</file>
         <file alias="RECORD">images/glyphicons_169_record.png</file>
         <file alias="ADD">images/glyphicons_add.png</file>
-        <file>images/glyphicons_test.png</file>
+        <file alias="TEST">images/glyphicons_test.png</file>
     </qresource>
 </RCC>
